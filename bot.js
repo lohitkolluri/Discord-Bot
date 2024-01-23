@@ -6,7 +6,6 @@ require('dotenv').config();
 
 const token = process.env.BOT_TOKEN;
 const clientId = process.env.CLIENT_ID;
-const guildId = process.env.GUILD_ID;
 
 const client = new Client({
   intents: [
@@ -28,7 +27,7 @@ for (const file of commandFiles) {
 client.once('ready', () => {
   console.log(`Logged in as ${client.user.tag}!`);
 
-  // Register commands
+  // Register commands globally
   const rest = new REST({ version: '9' }).setToken(token);
 
   (async () => {
@@ -36,7 +35,7 @@ client.once('ready', () => {
       console.log('Started refreshing application (/) commands.');
 
       await rest.put(
-        Routes.applicationGuildCommands(clientId, guildId),
+        Routes.applicationCommands(clientId),
         { body: Array.from(client.commands.values()).map(command => command.data) },
       );
 
