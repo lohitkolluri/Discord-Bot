@@ -5,7 +5,6 @@ const fs = require('fs');
 require('dotenv').config();
 
 const token = process.env.BOT_TOKEN;
-const clientId = process.env.CLIENT_ID;
 
 const client = new Client({
   intents: [
@@ -26,6 +25,9 @@ for (const file of commandFiles) {
 
 client.once('ready', () => {
   console.log(`Logged in as ${client.user.tag}!`);
+
+  // Dynamically fetch client ID
+  const clientId = client.user.id;
 
   // Register commands globally
   const rest = new REST({ version: '9' }).setToken(token);
