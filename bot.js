@@ -1,18 +1,12 @@
 const { Client, GatewayIntentBits } = require('discord.js');
 const { REST } = require('@discordjs/rest');
 const { Routes } = require('discord-api-types/v9');
-require('dotenv').config(); // Load environment variables from .env file
+const fs = require('fs');
+require('dotenv').config();
 
 const token = process.env.BOT_TOKEN;
 const clientId = process.env.CLIENT_ID;
 const guildId = process.env.GUILD_ID;
-
-const commands = [
-  {
-    name: 'ping',
-    description: 'Replies with Pong!',
-  },
-];
 
 const client = new Client({
   intents: [
@@ -22,9 +16,18 @@ const client = new Client({
   ],
 });
 
+client.commands = new Map();
+
+const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'));
+
+for (const file of commandFiles) {
+  const command = require(`./commands/${file}`);
+  client.commands.set(command.data.name, command);
+}
+
 client.once('ready', () => {
   console.log(`Logged in as ${client.user.tag}!`);
-  
+
   // Register commands
   const rest = new REST({ version: '9' }).setToken(token);
 
@@ -34,7 +37,7 @@ client.once('ready', () => {
 
       await rest.put(
         Routes.applicationGuildCommands(clientId, guildId),
-        { body: commands },
+        { body: Array.from(client.commands.values()).map(command => command.data) },
       );
 
       console.log('Successfully reloaded application (/) commands.');
@@ -49,8 +52,13 @@ client.on('interactionCreate', async (interaction) => {
 
   const { commandName } = interaction;
 
-  if (commandName === 'ping') {
-    await interaction.reply('Pong!');
+  if (client.commands.has(commandName)) {
+    try {
+      await client.commands.get(commandName).execute(interaction);
+    } catch (error) {
+      console.error(error);
+      await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
+    }
   }
 });
 
