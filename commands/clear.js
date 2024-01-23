@@ -15,7 +15,6 @@ module.exports = {
             return interaction.reply({ content: 'Please provide a number between 1 and 100.', ephemeral: true });
         }
 
-        // Defer the reply to stay within the 3 seconds limit
         await interaction.deferReply({ ephemeral: true });
 
         try {
@@ -30,7 +29,6 @@ module.exports = {
                 messagesToDelete -= limit;
             }
 
-            // Edit the deferred reply with the actual result
             interaction.editReply({ content: `Cleared ${amount} messages.`, ephemeral: true });
         } catch (error) {
             console.error('Error clearing messages:', error);
