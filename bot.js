@@ -38,6 +38,7 @@ app.get('/', (req, res) => {
   const commands = Array.from(client.commands.keys());
   const inviteLink = `https://discord.com/oauth2/authorize?client_id=${client.user.id}&permissions=8&scope=bot`;
 
+
   res.send(`
     <!DOCTYPE html>
     <html lang="en">
@@ -48,8 +49,8 @@ app.get('/', (req, res) => {
       <style>
         body {
           font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-          background-color: #f8f9fa;
-          color: #343a40;
+          background-color: #2c3e50;
+          color: #ecf0f1;
           text-align: center;
           margin: 20px;
         }
@@ -59,8 +60,8 @@ app.get('/', (req, res) => {
         img {
           border-radius: 50%;
           margin-top: 10px;
-          border: 2px solid #3498db;
-          animation: pulse 2s infinite alternate; /* Add this line for the pulsating effect */
+          border: 4px solid #3498db;
+          animation: pulse 2s infinite alternate;
         }
         p {
           color: #2ecc71;
@@ -69,20 +70,22 @@ app.get('/', (req, res) => {
         ul {
           list-style-type: none;
           padding: 0;
+          display: flex;
+          flex-wrap: wrap;
+          justify-content: center;
         }
         li {
-          background-color: #ecf0f1;
+          background-color: #3498db;
           margin: 10px;
           padding: 15px;
           border-radius: 8px;
-          display: inline-block;
-          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-          transition: transform 0.3s ease-in-out;
+          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+          transition: transform 0.3s ease-in-out, background-color 0.3s ease-in-out;
+          cursor: pointer;
         }
         li:hover {
           transform: scale(1.05);
-          background-color: #3498db;
-          color: #fff;
+          background-color: #2980b9;
         }
         button {
           background-color: #3498db;
@@ -125,31 +128,28 @@ app.get('/', (req, res) => {
     </html>
   `);
 });
-
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });
 
-client.once('ready', () => {
+client.once('ready', async () => {
   console.log(`Logged in as ${client.user.tag}!`);
 
   const clientId = client.user.id;
   const rest = new REST({ version: '9' }).setToken(token);
 
-  (async () => {
-    try {
-      console.log('Started refreshing application (/) commands.');
+  try {
+    console.log('Started refreshing application (/) commands globally.');
 
-      await rest.put(
-        Routes.applicationCommands(clientId),
-        { body: Array.from(client.commands.values()).map(command => command.data) },
-      );
+    await rest.put(
+      Routes.applicationCommands(clientId),
+      { body: Array.from(client.commands.values()).map(command => command.data) },
+    );
 
-      console.log('Successfully reloaded application (/) commands.');
-    } catch (error) {
-      console.error(error);
-    }
-  })();
+    console.log('Successfully reloaded application (/) commands globally.');
+  } catch (error) {
+    console.error(error);
+  }
 });
 
 client.on('interactionCreate', async (interaction) => {

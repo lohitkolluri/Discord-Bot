@@ -11,18 +11,23 @@ module.exports = {
                 .setRequired(true)),
     async execute(interaction) {
         const targetUser = interaction.options.getUser('target');
+        const member = interaction.guild.members.cache.get(targetUser.id);
 
         const embed = new EmbedBuilder()
-            .setColor('#0099ff')
-            .setTitle('User Information')
-            .addFields(
-                { name: 'Username', value: targetUser.username, inline: true }, 
-                { name: 'User ID', value: targetUser.id, inline: true },
-            )
-            .setThumbnail(targetUser.displayAvatarURL({ dynamic: true }))
-            .setTimestamp()
-            .setFooter({ text: 'Requested by ' + interaction.user.tag, iconURL: interaction.user.displayAvatarURL({ dynamic: true }) });
-
+        .setColor('#3498db')
+        .setTitle('User Information')
+        .setThumbnail(targetUser.displayAvatarURL({ dynamic: true }))
+        .addFields(
+            { name: 'Username', value: targetUser.username, inline: true },
+            { name: 'User ID', value: targetUser.id, inline: true },
+            { name: 'Tag', value: targetUser.tag, inline: true },
+            { name: 'Joined Server', value: member.joinedAt.toDateString(), inline: true },
+            { name: 'Account Created', value: targetUser.createdAt.toDateString(), inline: true },
+            { name: 'Roles', value: member.roles.cache.map(role => role.name).join(', '), inline: false }
+        )
+        .setTimestamp()
+        .setFooter({ text: `Requested by ${interaction.user.tag}`, iconURL: interaction.user.displayAvatarURL({ dynamic: true }) });
+    
 
         interaction.reply({ embeds: [embed], ephemeral: true });
     },
